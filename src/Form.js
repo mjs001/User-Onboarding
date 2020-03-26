@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from "react";
 import * as Yup from "yup";
-
+import axios from "axios";
 function Form() {
+  const [users, setUsers] = useState([]);
+  const [post, setPost] = useState([]);
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const formSubmit = e => {
     e.preventDefault();
     console.log("submitted");
+    axios
+      .post("https://reqres.in/api/users", formState, users)
+      .then(res => {
+        setPost(res.data);
+        users(res.data);
+        setUsers(users);
+        console.log("success", res);
+        console.log("users", users);
+      })
+      .catch(err => console.log(err.response));
   };
 
   const [formState, setFormState] = useState({
@@ -36,11 +48,9 @@ function Form() {
       setButtonDisabled(!valid);
     });
   }, [formState]);
-
-  const inputChange = e => {
-    e.persist();
+  const validateChange = e => {
     Yup.reach(formSchema, e.target.name)
-      .validate(e.target.value)
+      .validate(e.target.name === "terms" ? e.target.checked : e.target.value)
       .then(valid => {
         setErrors({
           ...errors,
@@ -53,14 +63,20 @@ function Form() {
           [e.target.name]: err.errors[0]
         });
       });
-
-    setFormState({
-      ...formState,
-      [e.target.name]: e.target.value
-    });
   };
+  const inputChange = e => {
+    e.persist();
+    const newFormData = {
+      ...formState,
+      [e.target.name]:
+        e.target.type === "checkbox" ? e.target.checked : e.target.value
+    };
+    validateChange(e);
+    setFormState(newFormData);
+  };
+
   return (
-    <form>
+    <form onSubmit={formSubmit}>
       <label htmlFor="name">
         <input
           type="name"
@@ -105,7 +121,8 @@ function Form() {
           onChange={inputChange}
         />
       </label>
-      <button>Submit</button>
+      <button disabled={buttonDisabled}>Submit</button>
+      <pre>{JSON.stringify(post, null, 2)}</pre>
     </form>
   );
 }
