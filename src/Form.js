@@ -2,18 +2,22 @@ import React, { useState, useEffect } from "react";
 import * as Yup from "yup";
 import axios from "axios";
 function Form() {
-  const [users, setUsers] = useState([]);
   const [post, setPost] = useState([]);
+  const [users, setUsers] = useState([]);
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const formSubmit = e => {
     e.preventDefault();
     console.log("submitted");
     axios
-      .post("https://reqres.in/api/users", formState, users)
+      .post("https://reqres.in/api/users", formState)
       .then(res => {
-        setPost(res.data);
-        users(res.data);
-        setUsers(users);
+        setPost([...post, res.data]);
+        setFormState({
+          name: "",
+          email: "",
+          terms: "",
+          password: ""
+        });
         console.log("success", res);
         console.log("users", users);
       })
@@ -48,6 +52,7 @@ function Form() {
       setButtonDisabled(!valid);
     });
   }, [formState]);
+
   const validateChange = e => {
     Yup.reach(formSchema, e.target.name)
       .validate(e.target.name === "terms" ? e.target.checked : e.target.value)
