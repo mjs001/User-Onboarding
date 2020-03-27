@@ -47,12 +47,6 @@ function Form() {
     terms: ""
   });
 
-  useEffect(() => {
-    formSchema.isValid(formState).then(valid => {
-      setButtonDisabled(!valid);
-    });
-  }, [formState]);
-
   const validateChange = e => {
     Yup.reach(formSchema, e.target.name)
       .validate(e.target.name === "terms" ? e.target.checked : e.target.value)
@@ -90,6 +84,7 @@ function Form() {
           value={formState.name}
           onChange={inputChange}
         />
+        {errors.name.length > 0 ? <p className="error">{errors.name}</p> : null}
       </label>
       <label htmlFor="email">
         <input
@@ -126,7 +121,7 @@ function Form() {
           onChange={inputChange}
         />
       </label>
-      <button disabled={buttonDisabled}>Submit</button>
+      <button>Submit</button>
       <pre>{JSON.stringify(post, null, 2)}</pre>
     </form>
   );
